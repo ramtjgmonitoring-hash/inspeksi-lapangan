@@ -5,35 +5,40 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Field Inspector Pro</title>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 15px; background: #eef2f5; margin: 0; }
-    .card { background: white; padding: 20px; border-radius: 12px; max-width: 450px; margin: 0 auto; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    h2 { margin-top: 0; text-align: center; color: #1a252f; font-size: 20px; }
-    .form-group { margin-bottom: 15px; }
-    label.title-label { display: block; font-weight: bold; margin-bottom: 8px; font-size: 14px; color: #2c3e50; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 12px; background: #eef2f5; margin: 0; }
+    .card { background: white; padding: 16px; border-radius: 12px; max-width: 450px; margin: 0 auto; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    h2 { margin-top: 0; text-align: center; color: #1a252f; font-size: 18px; margin-bottom: 12px; }
+    .form-group { margin-bottom: 12px; }
+    label.title-label { display: block; font-weight: bold; margin-bottom: 6px; font-size: 12px; color: #2c3e50; }
     
-    .radio-group { display: flex; flex-direction: column; gap: 8px; }
-    .radio-option {
-      display: flex; align-items: center; padding: 12px; background: #f8f9fa;
-      border: 1px solid #dcdfe6; border-radius: 8px; cursor: pointer; transition: 0.2s;
-    }
-    .radio-option:hover { background: #eef5ff; border-color: #3498db; }
-    .radio-option input { margin-right: 10px; width: 18px; height: 18px; accent-color: #27ae60; }
-    .radio-option span { font-size: 14px; font-weight: 500; }
+    /* Grid Horizontal Kategori */
+    .radio-grid-kategori { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    
+    /* Grid Horizontal Ukuran Pipa */
+    .radio-grid-pipa { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
 
-    textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 14px; }
+    .radio-card {
+      display: flex; align-items: center; justify-content: center; padding: 6px 4px; background: #f8f9fa;
+      border: 1px solid #dcdfe6; border-radius: 6px; cursor: pointer; transition: 0.2s; user-select: none;
+    }
+    .radio-card:hover { background: #eef5ff; border-color: #3498db; }
+    .radio-card input { margin-right: 4px; width: 14px; height: 14px; accent-color: #27ae60; cursor: pointer; }
+    .radio-card span { font-size: 11px; font-weight: 600; color: #333; }
+
+    textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-family: inherit; font-size: 12px; resize: vertical; }
     
-    .btn-container { display: flex; gap: 10px; margin-top: 15px; }
-    .btn-save { flex: 1; background: #27ae60; color: white; border: none; padding: 14px; font-size: 15px; font-weight: bold; border-radius: 8px; cursor: pointer; }
-    .btn-map { flex: 1; background: #2980b9; color: white; border: none; padding: 14px; font-size: 15px; font-weight: bold; border-radius: 8px; cursor: pointer; text-decoration: none; text-align: center; line-height: 18px; }
+    .btn-container { display: flex; gap: 8px; margin-top: 12px; }
+    .btn-save { flex: 1; background: #27ae60; color: white; border: none; padding: 12px; font-size: 13px; font-weight: bold; border-radius: 6px; cursor: pointer; }
+    .btn-map { flex: 1; background: #2980b9; color: white; border: none; padding: 12px; font-size: 13px; font-weight: bold; border-radius: 6px; cursor: pointer; text-decoration: none; text-align: center; line-height: 16px; }
     .btn-save:active, .btn-map:active { transform: scale(0.98); }
     
-    #status { margin-top: 15px; font-size: 13px; text-align: center; white-space: pre-line; font-weight: bold; color: #333; }
+    #status { margin-top: 10px; font-size: 12px; text-align: center; white-space: pre-line; font-weight: bold; color: #333; }
     
-    .history-card { margin-top: 20px; background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; }
-    .history-item { font-size: 13px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #cbd5e1; }
+    .history-card { margin-top: 15px; background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; }
+    .history-item { font-size: 12px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed #cbd5e1; }
     .history-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-    .history-date { font-size: 11px; color: #64748b; margin-top: 2px; }
-    .gmaps-link { display: inline-block; margin-top: 6px; color: #1d4ed8; text-decoration: none; font-weight: bold; font-size: 12px; }
+    .history-date { font-size: 10px; color: #64748b; margin-top: 2px; }
+    .gmaps-link { display: inline-block; margin-top: 4px; color: #1d4ed8; text-decoration: none; font-weight: bold; font-size: 11px; }
     .gmaps-link:hover { text-decoration: underline; }
   </style>
 </head>
@@ -42,31 +47,45 @@
 <div class="card">
   <h2>📍 Field Inspector Pro</h2>
 
+  <!-- Status Penanganan -->
   <div class="form-group">
-    <label class="title-label">Kategori / Status Penanganan:</label>
-    <div class="radio-group">
-      <label class="radio-option">
-        <input type="radio" name="kategori" value="Titik Bocor" checked>
-        <span>🔴 Titik Bocor (Leak Point)</span>
-      </label>
-      <label class="radio-option">
-        <input type="radio" name="kategori" value="Clamp">
+    <label class="title-label">Status Penanganan:</label>
+    <div class="radio-grid-kategori">
+      <label class="radio-card">
+        <input type="radio" name="kategori" value="Clamp" checked>
         <span>🟠 Clamp</span>
       </label>
-      <label class="radio-option">
+      <label class="radio-card">
         <input type="radio" name="kategori" value="Patching">
         <span>🔵 Patching</span>
       </label>
-      <label class="radio-option">
+      <label class="radio-card">
         <input type="radio" name="kategori" value="Sisip">
         <span>🟣 Sisip</span>
       </label>
     </div>
   </div>
 
+  <!-- Ukuran Pipa -->
   <div class="form-group">
-    <label class="title-label">Keterangan Tambahan:</label>
-    <textarea id="keterangan" rows="3" placeholder="Catatan teknis ukuran/kondisi lapangan..."></textarea>
+    <label class="title-label">Ukuran Pipa (Inch):</label>
+    <div class="radio-grid-pipa">
+      <label class="radio-card"><input type="radio" name="ukuranPipa" value="2 Inch"><span>2"</span></label>
+      <label class="radio-card"><input type="radio" name="ukuranPipa" value="3 Inch"><span>3"</span></label>
+      <label class="radio-card"><input type="radio" name="ukuranPipa" value="4 Inch"><span>4"</span></label>
+      <label class="radio-card"><input type="radio" name="ukuranPipa" value="6 Inch" checked><span>6"</span></label>
+      <label class="radio-card"><input type="radio" name="ukuranPipa" value="8 Inch"><span>8"</span></label>
+      <label class="radio-card"><input type="radio" name="ukuranPipa" value="10 Inch"><span>10"</span></label>
+      <label class="radio-card"><input type="radio" name="ukuranPipa" value="12 Inch"><span>12"</span></label>
+      <label class="radio-card"><input type="radio" name="ukuranPipa" value="16 Inch"><span>16"</span></label>
+      <label class="radio-card"><input type="radio" name="ukuranPipa" value="20 Inch"><span>20"</span></label>
+    </div>
+  </div>
+
+  <!-- Keterangan -->
+  <div class="form-group">
+    <label class="title-label">Catatan Tambahan (Opsional):</label>
+    <textarea id="keterangan" rows="2" placeholder="Catatan kondisi lapangan..."></textarea>
   </div>
 
   <div class="btn-container">
@@ -77,13 +96,13 @@
   <div id="status"></div>
 
   <div class="history-card" id="historyBox">
-    <strong style="font-size:13px; color:#334155;">📋 Riwayat Data Tersimpan (Tim):</strong>
-    <div id="historyContent" style="margin-top:8px; font-size: 12px; color: #666;">Memuat riwayat data...</div>
+    <strong style="font-size:12px; color:#334155;">📋 Riwayat Data Tersimpan (Tim):</strong>
+    <div id="historyContent" style="margin-top:6px; font-size: 11px; color: #666;">Memuat riwayat data...</div>
   </div>
 </div>
 
 <script>
-  // PENTING: Ganti URL di bawah dengan Web App URL dari Google Apps Script Anda
+  // PENTING: Pastikan Web App URL Google Apps Script Anda terpasang di sini
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx2zAJEkblbiXRo7sjzgjQnXrYisjwSJxPpTHnmNeghmvFuZJDgW6uz7ACaCUXLohDfHw/exec";
 
   async function loadHistoryFromSheets() {
@@ -106,14 +125,12 @@
           ? rawDate.toLocaleString('id-ID', { day: 'numeric', month: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) 
           : 'Data Manual';
 
-        // Bersihkan koordinat dari spasi tersembunyi
-        const lat = String(row[1]).trim();
-        const lon = String(row[2]).trim();
+        const lat = String(row[1]).trim().replace(',', '.');
+        const lon = String(row[2]).trim().replace(',', '.');
         const kategori = row[3] || '-';
         const namaJalan = row[5] || 'Alamat tidak dicatat';
         const keterangan = row[6] || '';
         
-        // FORMAT LINK UNIVERSAL
         const gmapsUrl = `https://www.google.com/maps?q=${lat},${lon}`;
 
         historyHTML += `
@@ -145,7 +162,11 @@
   function processAndSave() {
     const status = document.getElementById('status');
     const selectedKategori = document.querySelector('input[name="kategori"]:checked').value;
-    const keterangan = document.getElementById('keterangan').value;
+    const selectedUkuran = document.querySelector('input[name="ukuranPipa"]:checked').value;
+    const catatanInput = document.getElementById('keterangan').value.trim();
+
+    // Gabungkan ukuran pipa ke dalam keterangan
+    const keteranganLengkap = catatanInput ? `Pipa ${selectedUkuran} - ${catatanInput}` : `Pipa ${selectedUkuran}`;
 
     status.innerText = "⏳ 1/3 Mengunci Koordinat GPS...";
 
@@ -170,7 +191,7 @@
           longitude: lon,
           kategori: selectedKategori,
           kondisi: "-",
-          keterangan: keterangan,
+          keterangan: keteranganLengkap,
           namaJalan: namaJalan,
           accuracy: acc
         };
