@@ -78,15 +78,61 @@
 
   <div id="status"></div>
 
-  <div class="history-card" id="historyBox" style="display:none;">
-    <strong style="font-size:13px; color:#334155;">📋 Riwayat Data Tersimpan:</strong>
-    <div id="historyContent" style="margin-top:8px;"></div>
+  <div class="history-card" id="historyBox">
+    <strong style="font-size:13px; color:#334155;">📋 Riwayat Data Tersimpan (Tim):</strong>
+    <div id="historyContent" style="margin-top:8px; font-size: 12px; color: #666;">Memuat riwayat data...</div>
   </div>
 </div>
 
 <script>
   // PENTING: Ganti URL di bawah dengan Web App URL dari Google Apps Script Anda
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyxhGVCzXvAdjsZt-M6XJAEAO6caKyfn8GpsGtHjGfl6WS-r6jvyTi_CQVPP9qKTr4BsA/exec";
+
+  // Memuat riwayat data otomatis dari Google Sheets saat halaman web dibuka
+  async function loadHistoryFromSheets() {
+    const historyContent = document.getElementById('historyContent');
+    try {
+      const res = await fetch(APPS_SCRIPT_URL);
+      const data = await res.json();
+      
+      // Mengabaikan header (baris 0) dan mengambil data riwayat
+      const rows = data.slice(1);
+      
+      if (rows.length === 0) {
+        historyContent.innerText = "Belum ada riwayat data tersimpan.";
+        return;
+      }
+
+      let historyHTML = "";
+      // Loop data dari yang paling baru (paling bawah di sheet) ke atas
+      for (let i = rows.length - 1; i >= 0; i--) {
+        const row = rows[i];
+        const timestamp = new Date(row[0]).toLocaleString('id-ID', { 
+          day: 'numeric', month: 'numeric', year: 'numeric', 
+          hour: '2-digit', minute: '2-digit', second: '2-digit' 
+        });
+        const lat = row[1];
+        const lon = row[2];
+        const kategori = row[3] || '-';
+        const namaJalan = row[5] || 'Alamat tidak dicatat';
+        const keterangan = row[6] || '';
+        const gmapsUrl = `https://maps.google.com/?q=${lat},${lon}`;
+
+        historyHTML += `
+          <div class="history-item">
+            <strong style="color:#1e293b;">${kategori}</strong> ${keterangan ? `(${keterangan})` : ''}<br>
+            📍 <span style="color:#475569;">${namaJalan}</span><br>
+            🕒 <span class="history-date">${timestamp}</span><br>
+            <a href="${gmapsUrl}" target="_blank" class="gmaps-link">🗺️ Buka di Google Maps App</a>
+          </div>
+        `;
+      }
+      historyContent.innerHTML = historyHTML;
+    } catch (e) {
+      console.error(e);
+      historyContent.innerText = "Gagal memuat riwayat data.";
+    }
+  }
 
   async function getStreetName(lat, lon) {
     try {
@@ -141,33 +187,10 @@
         })
         .then(() => {
           status.innerText = "✅ DATA BERHASIL TERSIMPAN!";
-          
-          const gmapsUrl = `https://maps.google.com/?q=${lat},${lon}`;
-          const now = new Date().toLocaleString('id-ID', { 
-            day: 'numeric', month: 'numeric', year: 'numeric', 
-            hour: '2-digit', minute: '2-digit', second: '2-digit' 
-          });
-
-          const historyBox = document.getElementById('historyBox');
-          const historyContent = document.getElementById('historyContent');
-          
-          if (historyBox && historyContent) {
-            historyBox.style.display = 'block';
-            
-            // Menyisipkan record baru ke urutan teratas list
-            const newItemHTML = `
-              <div class="history-item">
-                <strong style="color:#1e293b;">${selectedKategori}</strong> ${keterangan ? `(${keterangan})` : ''}<br>
-                📍 <span style="color:#475569;">${namaJalan}</span><br>
-                🕒 <span class="history-date">${now}</span><br>
-                <a href="${gmapsUrl}" target="_blank" class="gmaps-link">🗺️ Buka di Google Maps App</a>
-              </div>
-            `;
-            
-            historyContent.innerHTML = newItemHTML + historyContent.innerHTML;
-          }
-
           document.getElementById('keterangan').value = '';
+          
+          // Refresh ulang riwayat secara real-time dari Google Sheets
+          setTimeout(loadHistoryFromSheets, 1500);
         })
         .catch(err => {
           status.innerText = "❌ Gagal menyimpan data.";
@@ -178,6 +201,9 @@
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
   }
+
+  // Jalankan pemuatan riwayat otomatis saat halaman dibuka
+  loadHistoryFromSheets();
 </script>
 
 </body>
