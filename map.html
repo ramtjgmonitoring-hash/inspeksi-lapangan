@@ -3,29 +3,75 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Peta Inspeksi</title>
+  <title>Peta Monitoring Inspeksi</title>
+
+  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
   <style>
-    body, html { margin: 0; padding: 0; height: 100%; }
+    body, html { margin: 0; padding: 0; height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     #map { width: 100%; height: 100vh; }
-    .legend { background: white; padding: 10px; border-radius: 5px; font-size: 12px; line-height: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.2); }
-    .legend i { width: 12px; height: 12px; float: left; margin-right: 8px; margin-top: 4px; border-radius: 50%; }
+    
+    /* Panel Legenda */
+    .legend {
+      background: white;
+      padding: 12px 16px;
+      line-height: 24px;
+      color: #333;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      font-size: 13px;
+    }
+    .legend h4 { margin: 0 0 8px; color: #1a252f; font-size: 14px; }
+    .legend i {
+      width: 14px;
+      height: 14px;
+      float: left;
+      margin-right: 8px;
+      margin-top: 5px;
+      border-radius: 50%;
+      border: 1px solid #777;
+    }
+
+    /* Popup Styling */
+    .popup-title { font-weight: bold; font-size: 14px; margin-bottom: 5px; border-bottom: 1px solid #ddd; padding-bottom: 3px; }
+    .popup-detail { font-size: 12px; margin: 4px 0; color: #444; }
+    .btn-gmaps {
+      display: inline-block;
+      margin-top: 6px;
+      background: #4285F4;
+      color: white !important;
+      padding: 6px 10px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: bold;
+      text-align: center;
+    }
+    .btn-gmaps:hover { background: #3367d6; }
   </style>
 </head>
 <body>
+
 <div id="map"></div>
 
+<!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
-  // ⚠️ GANTI TULISAN DI BAWAH DENGAN URL APPS SCRIPT YANG SAMA
+  // 1. Masukkan URL Apps Script Anda di sini
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwLJCT-IrxFHXdlKdj2w9ZcIok9egprfe_KcvjtREpIup4Ra05VRVeqqS9--3kcaPjlzQ/exec";
 
+  // 2. Inisialisasi Peta
   const map = L.map('map').setView([-2.2, 115.3], 5);
 
+  // Tile Layer dari OpenStreetMap
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap'
+    maxZoom: 19,
+    attribution: '© OpenStreetMap contributors'
   }).addTo(map);
 
+  // 3. Warna Pin Berdasarkan Kategori
   function getColor(kategori) {
     switch (kategori) {
       case 'Titik Bocor':  return '#e74c3c'; // Merah
@@ -36,60 +82,79 @@
     }
   }
 
+  // Membuat Custom Marker Circle
   function createCustomIcon(color) {
     return L.divIcon({
-      html: `<div style="background-color:${color}; width:16px; height:16px; border-radius:50%; border:2px solid white; box-shadow:0 0 4px rgba(0,0,0,0.4);"></div>`,
+      className: 'custom-div-icon',
+      html: `<div style="background-color:${color}; width:16px; height:16px; border-radius:50%; border:2px solid white; box-shadow:0 0 4px rgba(0,0,0,0.5);"></div>`,
       iconSize: [20, 20],
       iconAnchor: [10, 10]
     });
   }
 
+  // 4. Fetch Data dari Google Sheets
   async function loadMapData() {
     try {
-      const res = await fetch(APPS_SCRIPT_URL);
-      const data = await res.json();
+      const response = await fetch(APPS_SCRIPT_URL);
+      const data = await response.json();
+
+      // Mengabaikan baris pertama (Header)
       const rows = data.slice(1);
       const bounds = [];
 
       rows.forEach(row => {
-        const timestamp  = row[0];
-        const lat        = parseFloat(row[1]);
-        const lon        = parseFloat(row[2]);
-        const kategori   = row[3] || 'Lainnya';
-        const kondisi    = row[4] || '-';
-        const namaJalan  = row[5] || '-';
-        const keterangan = row[6] || '-';
+        const timestamp = row[0];
+        const lat       = parseFloat(row[1]);
+        const lon       = parseFloat(row[2]);
+        const kategori  = row[3] || 'Lainnya';
+        const namaJalan = row[5] || 'Alamat tidak dicatat';
+        const keterangan= row[6] || '-';
 
         if (!isNaN(lat) && !isNaN(lon)) {
           const color = getColor(kategori);
-          const icon = createCustomIcon(color);
+          const icon  = createCustomIcon(color);
+          
+          // Link direct ke Google Maps App / Web
+          const gmapsUrl = `https://maps.google.com/?q=${lat},${lon}`;
 
+          // Konten Popup Peta
           const popupContent = `
-            <b>${kategori}</b><br>
-            <b>Kondisi:</b> ${kondisi}<br>
-            <b>Lokasi:</b> ${namaJalan}<br>
-            <b>Ket:</b> ${keterangan}<br>
-            <small style="color:#777">${new Date(timestamp).toLocaleString('id-ID')}</small>
+            <div class="popup-title">${kategori}</div>
+            <div class="popup-detail"><strong>Lokasi:</strong> ${namaJalan}</div>
+            <div class="popup-detail"><strong>Catatan:</strong> ${keterangan}</div>
+            <div class="popup-detail" style="color: #888; font-size: 10px;">
+              ${new Date(timestamp).toLocaleString('id-ID')}
+            </div>
+            <a href="${gmapsUrl}" target="_blank" class="btn-gmaps">
+              🗺️ Buka di Google Maps
+            </a>
           `;
 
-          L.marker([lat, lon], { icon: icon }).bindPopup(popupContent).addTo(map);
+          // Tambahkan Marker ke Peta
+          L.marker([lat, lon], { icon: icon })
+            .bindPopup(popupContent)
+            .addTo(map);
+
           bounds.push([lat, lon]);
         }
       });
 
+      // Auto zoom-in agar seluruh marker terlihat
       if (bounds.length > 0) {
         map.fitBounds(bounds, { padding: [50, 50] });
       }
-    } catch (e) {
-      console.error(e);
+
+    } catch (err) {
+      console.error("Gagal memuat data:", err);
     }
   }
 
+  // 5. Panel Legenda Warna
   const legend = L.control({ position: 'bottomright' });
   legend.onAdd = function () {
     const div = L.DomUtil.create('div', 'legend');
     div.innerHTML = `
-      <b>Kategori</b><br>
+      <h4>Kategori Pekerjaan</h4>
       <i style="background: #e74c3c;"></i> Titik Bocor<br>
       <i style="background: #f39c12;"></i> Clamp<br>
       <i style="background: #3498db;"></i> Patching<br>
@@ -102,5 +167,6 @@
 
   loadMapData();
 </script>
+
 </body>
 </html>

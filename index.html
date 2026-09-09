@@ -3,209 +3,86 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart Field Inspector</title>
+  <title>Field Inspector Pro</title>
   <style>
-    :root {
-      --primary: #4f46e5;
-      --primary-hover: #4338ca;
-      --success: #10b981;
-      --bg-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-      --card-bg: #ffffff;
-      --text-main: #1f2937;
-      --text-muted: #6b7280;
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 15px; background: #eef2f5; margin: 0; }
+    .card { background: white; padding: 20px; border-radius: 12px; max-width: 450px; margin: 0 auto; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    h2 { margin-top: 0; text-align: center; color: #1a252f; font-size: 20px; }
+    .form-group { margin-bottom: 15px; }
+    label.title-label { display: block; font-weight: bold; margin-bottom: 8px; font-size: 14px; color: #2c3e50; }
+    
+    /* Style Pilihan Radio/Check-List */
+    .radio-group { display: flex; flex-direction: column; gap: 8px; }
+    .radio-option {
+      display: flex; align-items: center; padding: 10px 12px; background: #f8f9fa;
+      border: 1px solid #dcdfe6; border-radius: 8px; cursor: pointer; transition: 0.2s;
     }
+    .radio-option:hover { background: #eef5ff; border-color: #3498db; }
+    .radio-option input { margin-right: 10px; width: 18px; height: 18px; accent-color: #27ae60; }
+    .radio-option span { font-size: 14px; font-weight: 500; }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: var(--bg-gradient);
-      min-height: 100vh;
-      margin: 0;
-      padding: 15px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 480px;
-    }
-
-    .card {
-      background: var(--card-bg);
-      padding: 25px;
-      border-radius: 20px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-      backdrop-filter: blur(10px);
-    }
-
-    .header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .header h2 {
-      margin: 0;
-      color: var(--text-main);
-      font-size: 22px;
-    }
-
-    .header p {
-      margin: 5px 0 0;
-      color: var(--text-muted);
-      font-size: 13px;
-    }
-
-    .form-group {
-      margin-bottom: 16px;
-    }
-
-    label {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 6px;
-      font-size: 13px;
-      color: var(--text-main);
-    }
-
-    select, input, textarea {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #d1d5db;
-      border-radius: 10px;
-      box-sizing: border-box;
-      font-size: 14px;
-      transition: all 0.3s ease;
-      background: #f9fafb;
-    }
-
-    select:focus, input:focus, textarea:focus {
-      outline: none;
-      border-color: var(--primary);
-      background: #fff;
-      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
-    }
-
-    .btn-group {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .btn {
-      flex: 1;
-      padding: 14px;
-      font-size: 15px;
-      font-weight: bold;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: transform 0.1s ease, background 0.3s;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .btn:active {
-      transform: scale(0.98);
-    }
-
-    .btn-save {
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      color: white;
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-    }
-
-    .btn-view {
-      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-      color: white;
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-    }
-
-    #status {
-      margin-top: 15px;
-      font-size: 13px;
-      text-align: center;
-      white-space: pre-line;
-      font-weight: 500;
-      color: #4b5563;
-    }
-
-    /* Modal / Panel Record */
-    #recordModal {
-      display: none;
-      margin-top: 20px;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 15px;
-      max-height: 250px;
-      overflow-y: auto;
-    }
-
-    .record-item {
-      background: white;
-      padding: 10px;
-      border-radius: 8px;
-      margin-bottom: 8px;
-      font-size: 12px;
-      border-left: 4px solid var(--primary);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-
-    .record-item b {
-      color: var(--primary);
-    }
+    textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-family: inherit; }
+    
+    .btn-container { display: flex; gap: 10px; margin-top: 15px; }
+    .btn-save { flex: 1; background: #27ae60; color: white; border: none; padding: 14px; font-size: 15px; font-weight: bold; border-radius: 8px; cursor: pointer; }
+    .btn-map { flex: 1; background: #2980b9; color: white; border: none; padding: 14px; font-size: 15px; font-weight: bold; border-radius: 8px; cursor: pointer; text-decoration: none; text-align: center; }
+    .btn-save:active, .btn-map:active { transform: scale(0.98); }
+    
+    #status { margin-top: 15px; font-size: 13px; text-align: center; white-space: pre-line; font-weight: bold; }
+    
+    /* Style Riwayat & Link Maps */
+    .history-card { margin-top: 20px; background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; }
+    .history-item { font-size: 13px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px border-style: dashed; border-color: #cbd5e1; }
+    .gmaps-link { display: inline-block; margin-top: 4px; color: #1d4ed8; text-decoration: none; font-weight: bold; font-size: 12px; }
+    .gmaps-link:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <div class="card">
-    <div class="header">
-      <h2>📍 Field Inspector Pro</h2>
-      <p>Pencatatan Koordinat & Kerusakan Jaringan</p>
-    </div>
+<div class="card">
+  <h2>📍 Field Inspector Pro</h2>
 
-    <div class="form-group">
-      <label>Kategori / Status Penanganan:</label>
-      <select id="kategori">
-        <option value="Titik Bocor">🔴 Titik Bocor (Leak)</option>
-        <option value="Clamp">🟠 Pemasangan Clamp</option>
-        <option value="Patching">🔵 Patching</option>
-        <option value="Sleeve B">🟣 Sleeve B Repair</option>
-        <option value="Inspeksi Rutin">🟢 Inspeksi Rutin</option>
-      </select>
+  <div class="form-group">
+    <label class="title-label">Kategori / Status Penanganan:</label>
+    <div class="radio-group">
+      <label class="radio-option">
+        <input type="radio" name="kategori" value="Titik Bocor" checked>
+        <span>🔴 Titik Bocor (Leak Point)</span>
+      </label>
+      <label class="radio-option">
+        <input type="radio" name="kategori" value="Clamp">
+        <span>🟠 Clamp</span>
+      </label>
+      <label class="radio-option">
+        <input type="radio" name="kategori" value="Patching">
+        <span>🔵 Patching</span>
+      </label>
+      <label class="radio-option">
+        <input type="radio" name="kategori" value="Sleeve B">
+        <span>🟣 Sleeve B Repair</span>
+      </label>
     </div>
+  </div>
 
-    <div class="form-group">
-      <label>Kondisi / Penyebab Kerusakan:</label>
-      <input type="text" id="kondisi" placeholder="Contoh: Korosif, Retak Las, dll">
-    </div>
+  <div class="form-group">
+    <label class="title-label">Keterangan Tambahan:</label>
+    <textarea id="keterangan" rows="3" placeholder="Catatan teknis ukuran/kondisi lapangan..."></textarea>
+  </div>
 
-    <div class="form-group">
-      <label>Keterangan Tambahan:</label>
-      <textarea id="keterangan" rows="2" placeholder="Catatan teknis ukuran/kondisi lapangan..."></textarea>
-    </div>
+  <div class="btn-container">
+    <button class="btn-save" onclick="processAndSave()">🚀 SIMPAN LOKASI</button>
+    <a href="map.html" class="btn-map">📁 LIHAT PETA</a>
+  </div>
 
-    <div class="btn-group">
-      <button class="btn btn-save" onclick="processAndSave()">🚀 SIMPAN LOKASI</button>
-      <button class="btn btn-view" onclick="toggleRecords()">📂 LIHAT RECORD</button>
-    </div>
+  <div id="status"></div>
 
-    <div id="status"></div>
-
-    <!-- Panel View Record Langsung -->
-    <div id="recordModal">
-      <div style="font-weight: bold; margin-bottom: 8px; font-size: 13px; color: #333;">📋 Riwayat Data Tersimpan:</div>
-      <div id="recordList">Memuat data...</div>
-    </div>
+  <div class="history-card" id="historyBox" style="display:none;">
+    <strong style="font-size:13px; color:#334155;">📋 Riwayat Data Terakhir:</strong>
+    <div id="historyContent" style="margin-top:8px;"></div>
   </div>
 </div>
 
 <script>
-  // ⚠️ PASTIKAN URL APPS SCRIPT ANDA SUDAH DIPASANG DI SINI
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwLJCT-IrxFHXdlKdj2w9ZcIok9egprfe_KcvjtREpIup4Ra05VRVeqqS9--3kcaPjlzQ/exec";
 
   async function getStreetName(lat, lon) {
@@ -220,11 +97,10 @@
 
   function processAndSave() {
     const status = document.getElementById('status');
-    const kategori = document.getElementById('kategori').value;
-    const kondisi = document.getElementById('kondisi').value;
+    const selectedKategori = document.querySelector('input[name="kategori"]:checked').value;
     const keterangan = document.getElementById('keterangan').value;
 
-    status.innerText = "⏳ [1/3] Mengunci Koordinat GPS Presisi...";
+    status.innerText = "⏳ 1/3 Mengunci Koordinat GPS...";
 
     if (!navigator.geolocation) {
       status.innerText = "❌ GPS tidak didukung di browser ini.";
@@ -237,16 +113,16 @@
         const lon = pos.coords.longitude;
         const acc = pos.coords.accuracy;
 
-        status.innerText = "⏳ [2/3] Mengidentifikasi Nama Jalan...";
+        status.innerText = "⏳ 2/3 Mencari Nama Jalan...";
         const namaJalan = await getStreetName(lat, lon);
 
-        status.innerText = "⏳ [3/3] Mengirim data ke Spreadsheet...";
+        status.innerText = "⏳ 3/3 Menyimpan ke Database...";
 
         const payload = {
           latitude: lat,
           longitude: lon,
-          kategori: kategori,
-          kondisi: kondisi,
+          kategori: selectedKategori,
+          kondisi: "-", // Nilai default karena input dihilangkan
           keterangan: keterangan,
           namaJalan: namaJalan,
           accuracy: acc
@@ -258,57 +134,31 @@
         })
         .then(res => res.json())
         .then(data => {
-          status.innerText = `✅ DATA BERHASIL TERSIMPAN!\n📍 ${namaJalan}`;
-          document.getElementById('kondisi').value = '';
+          status.innerText = "✅ DATA BERHASIL TERSIMPAN!";
+          
+          // Tampilkan Riwayat + Link Google Maps
+          const gmapsUrl = `https://maps.google.com/?q=${lat},${lon}`;
+          const historyBox = document.getElementById('historyBox');
+          const historyContent = document.getElementById('historyContent');
+          
+          historyBox.style.display = 'block';
+          historyContent.innerHTML = `
+            <div class="history-item">
+              <strong>${selectedKategori}</strong><br>
+              📍 ${namaJalan}<br>
+              <a href="${gmapsUrl}" target="_blank" class="gmaps-link">🗺️ Buka di Google Maps App</a>
+            </div>
+          `;
+
           document.getElementById('keterangan').value = '';
         })
         .catch(err => {
-          status.innerText = "❌ Gagal menyimpan data ke server.";
+          status.innerText = "❌ Gagal menyimpan data.";
         });
       },
       (err) => { status.innerText = "❌ Gagal mengambil GPS: " + err.message; },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
-  }
-
-  // Fungsi untuk menampilkan riwayat record langsung di bawah form
-  async function toggleRecords() {
-    const modal = document.getElementById('recordModal');
-    const listDiv = document.getElementById('recordList');
-
-    if (modal.style.display === 'block') {
-      modal.style.display = 'none';
-      return;
-    }
-
-    modal.style.display = 'block';
-    listDiv.innerHTML = "⏳ Mengambil data riwayat...";
-
-    try {
-      const res = await fetch(APPS_SCRIPT_URL);
-      const data = await res.json();
-      const rows = data.slice(1).reverse(); // Ambil dari data terbaru di atas
-
-      if (rows.length === 0) {
-        listDiv.innerHTML = "Belum ada data terekam.";
-        return;
-      }
-
-      let html = "";
-      rows.slice(0, 10).forEach(row => { // Menampilkan 10 record terakhir
-        const waktu = new Date(row[0]).toLocaleString('id-ID');
-        html += `
-          <div class="record-item">
-            <b>${row[3]}</b> (${row[4] || 'Tanpa Kondisi'})<br>
-            📍 ${row[5]}<br>
-            <small style="color:#666;">🕒 ${waktu}</small>
-          </div>
-        `;
-      });
-      listDiv.innerHTML = html;
-    } catch (e) {
-      listDiv.innerHTML = "❌ Gagal memuat riwayat data.";
-    }
   }
 </script>
 
