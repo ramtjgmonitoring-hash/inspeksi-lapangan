@@ -67,7 +67,6 @@
 
   function getColor(kategori) {
     switch (kategori) {
-      case 'Titik Bocor':  return '#e74c3c'; // Merah
       case 'Clamp':        return '#f39c12'; // Oranye
       case 'Patching':     return '#3498db'; // Biru
       case 'Sisip':        return '#9b59b6'; // Ungu
@@ -145,11 +144,9 @@
     const div = L.DomUtil.create('div', 'legend');
     div.innerHTML = `
       <h4>Kategori Pekerjaan</h4>
-      <i style="background: #e74c3c;"></i> Titik Bocor<br>
       <i style="background: #f39c12;"></i> Clamp<br>
       <i style="background: #3498db;"></i> Patching<br>
       <i style="background: #9b59b6;"></i> Sisip<br>
-      <i style="background: #2ecc71;"></i> Rutin / Lainnya
     `;
     return div;
   };
