@@ -3,224 +3,311 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Field Inspector Pro</title>
+  <title>Dashboard & Data Inspeksi Lapangan</title>
+  
+  <!-- CDN Chart.js untuk Grafik Dashboard -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 12px; background: #eef2f5; margin: 0; }
-    .card { background: white; padding: 16px; border-radius: 12px; max-width: 450px; margin: 0 auto; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    h2 { margin-top: 0; text-align: center; color: #1a252f; font-size: 18px; margin-bottom: 12px; }
-    .form-group { margin-bottom: 12px; }
-    label.title-label { display: block; font-weight: bold; margin-bottom: 6px; font-size: 12px; color: #2c3e50; }
-    
-    /* Grid Horizontal Kategori */
-    .radio-grid-kategori { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-    
-    /* Grid Horizontal Ukuran Pipa */
-    .radio-grid-pipa { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: #f8fafc; color: #1e293b; }
 
-    .radio-card {
-      display: flex; align-items: center; justify-content: center; padding: 6px 4px; background: #f8f9fa;
-      border: 1px solid #dcdfe6; border-radius: 6px; cursor: pointer; transition: 0.2s; user-select: none;
+    /* Header Navigasi Tab */
+    .header-nav {
+      background: #0f172a;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 3px solid #0284c7;
     }
-    .radio-card:hover { background: #eef5ff; border-color: #3498db; }
-    .radio-card input { margin-right: 4px; width: 14px; height: 14px; accent-color: #27ae60; cursor: pointer; }
-    .radio-card span { font-size: 11px; font-weight: 600; color: #333; }
+    .header-title { color: #ffffff; font-size: 18px; font-weight: bold; }
+    .nav-buttons { display: flex; gap: 10px; }
+    .btn-tab {
+      padding: 8px 18px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      color: #ffffff;
+      background: #334155;
+    }
+    .btn-tab.active { background: #0284c7; }
+    .btn-tab:hover { opacity: 0.9; }
 
-    textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-family: inherit; font-size: 12px; resize: vertical; }
-    
-    .btn-container { display: flex; gap: 8px; margin-top: 12px; }
-    .btn-save { flex: 1; background: #27ae60; color: white; border: none; padding: 12px; font-size: 13px; font-weight: bold; border-radius: 6px; cursor: pointer; }
-    .btn-map { flex: 1; background: #2980b9; color: white; border: none; padding: 12px; font-size: 13px; font-weight: bold; border-radius: 6px; cursor: pointer; text-decoration: none; text-align: center; line-height: 16px; }
-    .btn-save:active, .btn-map:active { transform: scale(0.98); }
-    
-    #status { margin-top: 10px; font-size: 12px; text-align: center; white-space: pre-line; font-weight: bold; color: #333; }
-    
-    .history-card { margin-top: 15px; background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; }
-    .history-item { font-size: 12px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed #cbd5e1; }
-    .history-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-    .history-date { font-size: 10px; color: #64748b; margin-top: 2px; }
-    .gmaps-link { display: inline-block; margin-top: 4px; color: #1d4ed8; text-decoration: none; font-weight: bold; font-size: 11px; }
-    .gmaps-link:hover { text-decoration: underline; }
+    /* Layout Content */
+    .container { padding: 20px; max-width: 1400px; margin: 0 auto; }
+    .section-page { display: none; }
+    .section-page.active { display: block; }
+
+    /* Tampilan Tabel */
+    .table-container {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      overflow-x: auto;
+    }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; text-align: left; font-size: 14px; }
+    th { background: #f1f5f9; color: #334155; padding: 12px; border-bottom: 2px solid #e2e8f0; white-space: nowrap; }
+    td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; }
+    tr:hover { background-color: #f8fafc; }
+
+    /* Tampilan Dashboard Trend Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+      margin-top: 15px;
+    }
+    .card-chart {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border: 1px solid #e2e8f0;
+    }
+    .card-title { font-size: 16px; font-weight: 600; color: #1e293b; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+
+    /* Stat Cards */
+    .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+    .stat-card { background: #ffffff; padding: 18px; border-radius: 10px; border-left: 5px solid #0284c7; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .stat-title { font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: bold; }
+    .stat-value { font-size: 24px; font-weight: bold; color: #0f172a; margin-top: 5px; }
   </style>
 </head>
 <body>
 
-<div class="card">
-  <h2>📍 Field Inspector Pro</h2>
-
-  <!-- Status Penanganan -->
-  <div class="form-group">
-    <label class="title-label">Status Penanganan:</label>
-    <div class="radio-grid-kategori">
-      <label class="radio-card">
-        <input type="radio" name="kategori" value="Clamp" checked>
-        <span>🟠 Clamp</span>
-      </label>
-      <label class="radio-card">
-        <input type="radio" name="kategori" value="Patching">
-        <span>🔵 Patching</span>
-      </label>
-      <label class="radio-card">
-        <input type="radio" name="kategori" value="Sisip">
-        <span>🟣 Sisip</span>
-      </label>
+  <!-- Navigation Header -->
+  <header class="header-nav">
+    <div class="header-title">📌 Monitoring Inspeksi Lapangan</div>
+    <div class="nav-buttons">
+      <button id="btn-tabel" class="btn-tab active" onclick="switchTab('tabel')">📋 Data Inspeksi</button>
+      <button id="btn-dashboard" class="btn-tab" onclick="switchTab('dashboard')">📊 Dashboard Trend</button>
     </div>
-  </div>
+  </header>
 
-  <!-- Ukuran Pipa -->
-  <div class="form-group">
-    <label class="title-label">Ukuran Pipa (Inch):</label>
-    <div class="radio-grid-pipa">
-      <label class="radio-card"><input type="radio" name="ukuranPipa" value="2 Inch"><span>2"</span></label>
-      <label class="radio-card"><input type="radio" name="ukuranPipa" value="3 Inch"><span>3"</span></label>
-      <label class="radio-card"><input type="radio" name="ukuranPipa" value="4 Inch"><span>4"</span></label>
-      <label class="radio-card"><input type="radio" name="ukuranPipa" value="6 Inch" checked><span>6"</span></label>
-      <label class="radio-card"><input type="radio" name="ukuranPipa" value="8 Inch"><span>8"</span></label>
-      <label class="radio-card"><input type="radio" name="ukuranPipa" value="10 Inch"><span>10"</span></label>
-      <label class="radio-card"><input type="radio" name="ukuranPipa" value="12 Inch"><span>12"</span></label>
-      <label class="radio-card"><input type="radio" name="ukuranPipa" value="16 Inch"><span>16"</span></label>
-      <label class="radio-card"><input type="radio" name="ukuranPipa" value="20 Inch"><span>20"</span></label>
-    </div>
-  </div>
+  <div class="container">
 
-  <!-- Keterangan -->
-  <div class="form-group">
-    <label class="title-label">Catatan Tambahan (Opsional):</label>
-    <textarea id="keterangan" rows="2" placeholder="Catatan kondisi lapangan..."></textarea>
-  </div>
+    <!-- PAGE 1: TABEL DATA INSPEKSI -->
+    <section id="page-tabel" class="section-page active">
+      <div class="table-container">
+        <h3>📋 Data Hasil Inspeksi Lapangan</h3>
+        <table id="mainTable">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Latitude</th>
+              <th>Longitude</th>
+              <th>Kategori</th>
+              <th>Kondisi</th>
+              <th>Nama Jalan</th>
+              <th>Keterangan</th>
+              <th>Akurasi</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- Contoh Data Sampel (Nanti di-populate otomatis via Spreadsheet/Script Anda) -->
+            <tr>
+              <td>01/01/2023 00.00</td>
+              <td>-2,1122000</td>
+              <td>115,4321500</td>
+              <td>Clamp</td>
+              <td>Oil Pipe - Area ROW Pertamina</td>
+              <td>Oil Pipe Line BS-1</td>
+              <td>Pipa 6 Inch</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td>01/01/2023 00.00</td>
+              <td>-2,1126167</td>
+              <td>115,4330833</td>
+              <td>Clamp</td>
+              <td>Oil Pipe - Jalur pipa tertutup</td>
+              <td>Oil Pipe Line BS-1</td>
+              <td>Pipa 6 Inch</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td>01/01/2024 00.00</td>
+              <td>-2,1464500</td>
+              <td>115,4140333</td>
+              <td>Clamp</td>
+              <td>Oil Pipe - Area semak</td>
+              <td>Oil Pipe Line BS-4</td>
+              <td>Pipa 8 Inch</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td>-</td>
+              <td>-2,1363333</td>
+              <td>115,4175333</td>
+              <td>Clamp</td>
+              <td>Gas Pipe</td>
+              <td>Gas Line Powerplant-Manunggul</td>
+              <td>Pipa 4 Inch</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td>-</td>
+              <td>-2,1271333</td>
+              <td>115,4212500</td>
+              <td>Clamp</td>
+              <td>Gas Pipe</td>
+              <td>Gas Line BS-1 & 2 - Powerplant</td>
+              <td>Pipa 8 Inch</td>
+              <td>-</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
 
-  <div class="btn-container">
-    <button class="btn-save" onclick="processAndSave()">🚀 SIMPAN LOKASI</button>
-    <a href="map.html" class="btn-map">📁 LIHAT PETA</a>
-  </div>
-
-  <div id="status"></div>
-
-  <div class="history-card" id="historyBox">
-    <strong style="font-size:12px; color:#334155;">📋 Riwayat Data Tersimpan (Tim):</strong>
-    <div id="historyContent" style="margin-top:6px; font-size: 11px; color: #666;">Memuat riwayat data...</div>
-  </div>
-</div>
-
-<script>
-  // PENTING: Pastikan Web App URL Google Apps Script Anda terpasang di sini
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx2zAJEkblbiXRo7sjzgjQnXrYisjwSJxPpTHnmNeghmvFuZJDgW6uz7ACaCUXLohDfHw/exec";
-
-  async function loadHistoryFromSheets() {
-    const historyContent = document.getElementById('historyContent');
-    try {
-      const res = await fetch(APPS_SCRIPT_URL);
-      const data = await res.json();
-      const rows = data.slice(1);
+    <!-- PAGE 2: DASHBOARD TREND & ANALYTICS -->
+    <section id="page-dashboard" class="section-page">
       
-      if (rows.length === 0) {
-        historyContent.innerText = "Belum ada riwayat data tersimpan.";
-        return;
+      <!-- Metric Cards -->
+      <div class="summary-cards">
+        <div class="stat-card">
+          <div class="stat-title">Total Temuan Clamp</div>
+          <div class="stat-value" id="statTotal">0</div>
+        </div>
+        <div class="stat-card" style="border-left-color: #10b981;">
+          <div class="stat-title">Jumlah Jalur / Line</div>
+          <div class="stat-value" id="statJalur">0</div>
+        </div>
+        <div class="stat-card" style="border-left-color: #f59e0b;">
+          <div class="stat-title">Variasi Size Pipa</div>
+          <div class="stat-value" id="statSize">0</div>
+        </div>
+      </div>
+
+      <!-- Charts Grid -->
+      <div class="dashboard-grid">
+        <!-- Chart 1: Trend Jumlah Clamp Berdasarkan Ukuran Pipa -->
+        <div class="card-chart">
+          <div class="card-title">📏 Distribusi Clamp per Ukuran Pipa (Size)</div>
+          <canvas id="chartSize"></canvas>
+        </div>
+
+        <!-- Chart 2: Distribusi Clamp per Line / Nama Jalan -->
+        <div class="card-chart">
+          <div class="card-title">🗺️ Distribusi Clamp per Line / Nama Jalan</div>
+          <canvas id="chartJalur"></canvas>
+        </div>
+
+        <!-- Chart 3: Distribusi Kondisi Pipa -->
+        <div class="card-chart">
+          <div class="card-title">⚠️ Ringkasan Kondisi Lapangan</div>
+          <canvas id="chartKondisi"></canvas>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // --- Logic Switch Tab ---
+    function switchTab(tabName) {
+      document.querySelectorAll('.section-page').forEach(page => page.classList.remove('active'));
+      document.querySelectorAll('.btn-tab').forEach(btn => btn.classList.remove('active'));
+
+      if (tabName === 'tabel') {
+        document.getElementById('page-tabel').classList.add('active');
+        document.getElementById('btn-tabel').classList.add('active');
+      } else {
+        document.getElementById('page-dashboard').classList.add('active');
+        document.getElementById('btn-dashboard').classList.add('active');
+        renderDashboard(); // Render ulang grafik saat tab dashboard dibuka
       }
-
-      let historyHTML = "";
-      for (let i = rows.length - 1; i >= 0; i--) {
-        const row = rows[i];
-        const rawDate = row[0] ? new Date(row[0]) : null;
-        const timestamp = rawDate && !isNaN(rawDate) 
-          ? rawDate.toLocaleString('id-ID', { day: 'numeric', month: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) 
-          : 'Data Manual';
-
-        const lat = String(row[1]).trim().replace(',', '.');
-        const lon = String(row[2]).trim().replace(',', '.');
-        const kategori = row[3] || '-';
-        const namaJalan = row[5] || 'Alamat tidak dicatat';
-        const keterangan = row[6] || '';
-        
-        const gmapsUrl = `https://www.google.com/maps?q=${lat},${lon}`;
-
-        historyHTML += `
-          <div class="history-item">
-            <strong style="color:#1e293b;">${kategori}</strong> ${keterangan ? `(${keterangan})` : ''}<br>
-            📍 <span style="color:#475569;">${namaJalan}</span><br>
-            🕒 <span class="history-date">${timestamp}</span><br>
-            <a href="${gmapsUrl}" target="_blank" rel="noopener noreferrer" class="gmaps-link">🗺️ Buka di Google Maps App</a>
-          </div>
-        `;
-      }
-      historyContent.innerHTML = historyHTML;
-    } catch (e) {
-      console.error(e);
-      historyContent.innerText = "Gagal memuat riwayat data.";
-    }
-  }
-
-  async function getStreetName(lat, lon) {
-    try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`);
-      const data = await res.json();
-      return data.display_name || "Nama jalan tidak ditemukan";
-    } catch (e) {
-      return "Gagal mendapatkan nama jalan";
-    }
-  }
-
-  function processAndSave() {
-    const status = document.getElementById('status');
-    const selectedKategori = document.querySelector('input[name="kategori"]:checked').value;
-    const selectedUkuran = document.querySelector('input[name="ukuranPipa"]:checked').value;
-    const catatanInput = document.getElementById('keterangan').value.trim();
-
-    // Gabungkan ukuran pipa ke dalam keterangan
-    const keteranganLengkap = catatanInput ? `Pipa ${selectedUkuran} - ${catatanInput}` : `Pipa ${selectedUkuran}`;
-
-    status.innerText = "⏳ 1/3 Mengunci Koordinat GPS...";
-
-    if (!navigator.geolocation) {
-      status.innerText = "❌ GPS tidak didukung di browser ini.";
-      return;
     }
 
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const lat = pos.coords.latitude;
-        const lon = pos.coords.longitude;
-        const acc = pos.coords.accuracy;
+    // Variabel global untuk menyimpan instance chart agar dapat diperbarui tanpa bug render
+    let chartSizeInstance = null;
+    let chartJalurInstance = null;
+    let chartKondisiInstance = null;
 
-        status.innerText = "⏳ 2/3 Mencari Nama Jalan...";
-        const namaJalan = await getStreetName(lat, lon);
+    // --- Logic Membaca Tabel & Menampilkan Grafik ---
+    function renderDashboard() {
+      const rows = document.querySelectorAll("#mainTable tbody tr");
+      
+      let totalCount = 0;
+      let countSize = {};
+      let countJalur = {};
+      let countKondisi = {};
 
-        status.innerText = "⏳ 3/3 Menyimpan ke Database...";
+      rows.forEach(row => {
+        const cols = row.querySelectorAll("td");
+        if (cols.length >= 7) {
+          totalCount++;
+          
+          const kondisi = cols[4].innerText.trim() || 'Tidak Ada Data';
+          const namaJalan = cols[5].innerText.trim() || 'Tidak Ada Data';
+          const pipaSize = cols[6].innerText.trim() || 'Tidak Ada Data';
 
-        const payload = {
-          latitude: lat,
-          longitude: lon,
-          kategori: selectedKategori,
-          kondisi: "-",
-          keterangan: keteranganLengkap,
-          namaJalan: namaJalan,
-          accuracy: acc
-        };
+          countSize[pipaSize] = (countSize[pipaSize] || 0) + 1;
+          countJalur[namaJalan] = (countJalur[namaJalan] || 0) + 1;
+          
+          // Ambil kata utama kondisi (misal: "Oil Pipe", "Gas Pipe", dll)
+          const kondisiGroup = kondisi.split('-')[0].trim();
+          countKondisi[kondisiGroup] = (countKondisi[kondisiGroup] || 0) + 1;
+        }
+      });
 
-        fetch(APPS_SCRIPT_URL, {
-          method: "POST",
-          mode: "no-cors",
-          headers: {
-            "Content-Type": "text/plain"
-          },
-          body: JSON.stringify(payload)
-        })
-        .then(() => {
-          status.innerText = "✅ DATA BERHASIL TERSIMPAN!";
-          document.getElementById('keterangan').value = '';
-          setTimeout(loadHistoryFromSheets, 1500);
-        })
-        .catch(err => {
-          status.innerText = "❌ Gagal menyimpan data.";
-          console.error(err);
-        });
-      },
-      (err) => { status.innerText = "❌ Gagal mengambil GPS: " + err.message; },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-    );
-  }
+      // Update Quick Stats Card
+      document.getElementById('statTotal').innerText = totalCount;
+      document.getElementById('statJalur').innerText = Object.keys(countJalur).length;
+      document.getElementById('statSize').innerText = Object.keys(countSize).length;
 
-  loadHistoryFromSheets();
-</script>
+      // --- Chart 1: Size Pipa (Bar Chart) ---
+      const ctxSize = document.getElementById('chartSize').getContext('2d');
+      if (chartSizeInstance) chartSizeInstance.destroy();
+      chartSizeInstance = new Chart(ctxSize, {
+        type: 'bar',
+        data: {
+          labels: Object.keys(countSize),
+          datasets: [{
+            label: 'Jumlah Clamp',
+            data: Object.values(countSize),
+            backgroundColor: '#0284c7',
+            borderRadius: 6
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } } }
+      });
 
+      // --- Chart 2: Nama Jalan / Line (Doughnut Chart) ---
+      const ctxJalur = document.getElementById('chartJalur').getContext('2d');
+      if (chartJalurInstance) chartJalurInstance.destroy();
+      chartJalurInstance = new Chart(ctxJalur, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(countJalur),
+          datasets: [{
+            data: Object.values(countJalur),
+            backgroundColor: ['#0284c7', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#64748b']
+          }]
+        },
+        options: { responsive: true }
+      });
+
+      // --- Chart 3: Kondisi (Pie Chart) ---
+      const ctxKondisi = document.getElementById('chartKondisi').getContext('2d');
+      if (chartKondisiInstance) chartKondisiInstance.destroy();
+      chartKondisiInstance = new Chart(ctxKondisi, {
+        type: 'pie',
+        data: {
+          labels: Object.keys(countKondisi),
+          datasets: [{
+            data: Object.values(countKondisi),
+            backgroundColor: ['#06b6d4', '#f97316', '#84cc16', '#a855f7']
+          }]
+        },
+        options: { responsive: true }
+      });
+    }
+  </script>
 </body>
 </html>
