@@ -106,21 +106,22 @@
           ? rawDate.toLocaleString('id-ID', { day: 'numeric', month: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) 
           : 'Data Manual';
 
-        const lat = row[1];
-        const lon = row[2];
+        // Bersihkan koordinat dari spasi tersembunyi
+        const lat = String(row[1]).trim();
+        const lon = String(row[2]).trim();
         const kategori = row[3] || '-';
         const namaJalan = row[5] || 'Alamat tidak dicatat';
         const keterangan = row[6] || '';
         
-        // FORMAT LINK MAPS DIPERBAIKI SINI
-        const gmapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
+        // FORMAT LINK UNIVERSAL
+        const gmapsUrl = `https://www.google.com/maps?q=${lat},${lon}`;
 
         historyHTML += `
           <div class="history-item">
             <strong style="color:#1e293b;">${kategori}</strong> ${keterangan ? `(${keterangan})` : ''}<br>
             📍 <span style="color:#475569;">${namaJalan}</span><br>
             🕒 <span class="history-date">${timestamp}</span><br>
-            <a href="${gmapsUrl}" target="_blank" class="gmaps-link">🗺️ Buka di Google Maps App</a>
+            <a href="${gmapsUrl}" target="_blank" rel="noopener noreferrer" class="gmaps-link">🗺️ Buka di Google Maps App</a>
           </div>
         `;
       }
