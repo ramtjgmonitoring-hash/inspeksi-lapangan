@@ -3,49 +3,209 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Logger Inspeksi</title>
+  <title>Smart Field Inspector</title>
   <style>
-    body { font-family: sans-serif; padding: 15px; background: #eef2f5; margin: 0; }
-    .card { background: white; padding: 20px; border-radius: 12px; max-width: 450px; margin: 0 auto; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    h2 { margin-top: 0; text-align: center; color: #2c3e50; }
-    .form-group { margin-bottom: 12px; }
-    label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
-    select, input, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-    .btn-save { background: **#27ae60**; color: white; border: none; padding: 15px; font-size: 16px; font-weight: bold; border-radius: 6px; width: 100%; cursor: pointer; margin-top: 10px; }
-    #status { margin-top: 15px; font-size: 13px; text-align: center; white-space: pre-line; }
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --success: #10b981;
+      --bg-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+      --card-bg: #ffffff;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg-gradient);
+      min-height: 100vh;
+      margin: 0;
+      padding: 15px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      backdrop-filter: blur(10px);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .header h2 {
+      margin: 0;
+      color: var(--text-main);
+      font-size: 22px;
+    }
+
+    .header p {
+      margin: 5px 0 0;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: var(--text-main);
+    }
+
+    select, input, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      box-sizing: border-box;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      background: #f9fafb;
+    }
+
+    select:focus, input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.1s ease, background 0.3s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-save {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-view {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    #status {
+      margin-top: 15px;
+      font-size: 13px;
+      text-align: center;
+      white-space: pre-line;
+      font-weight: 500;
+      color: #4b5563;
+    }
+
+    /* Modal / Panel Record */
+    #recordModal {
+      display: none;
+      margin-top: 20px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 15px;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+
+    .record-item {
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 12px;
+      border-left: 4px solid var(--primary);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .record-item b {
+      color: var(--primary);
+    }
   </style>
 </head>
 <body>
-<div class="card">
-  <h2>📍 Logger Inspeksi</h2>
 
-  <div class="form-group">
-    <label>Kategori / Status:</label>
-    <select id="kategori">
-      <option value="Titik Bocor">Titik Bocor</option>
-      <option value="Clamp">Clamp</option>
-      <option value="Patching">Patching</option>
-      <option value="Sleeve B">Sleeve B</option>
-      <option value="Inspeksi Rutin">Inspeksi Rutin</option>
-    </select>
+<div class="container">
+  <div class="card">
+    <div class="header">
+      <h2>📍 Field Inspector Pro</h2>
+      <p>Pencatatan Koordinat & Kerusakan Jaringan</p>
+    </div>
+
+    <div class="form-group">
+      <label>Kategori / Status Penanganan:</label>
+      <select id="kategori">
+        <option value="Titik Bocor">🔴 Titik Bocor (Leak)</option>
+        <option value="Clamp">🟠 Pemasangan Clamp</option>
+        <option value="Patching">🔵 Patching</option>
+        <option value="Sleeve B">🟣 Sleeve B Repair</option>
+        <option value="Inspeksi Rutin">🟢 Inspeksi Rutin</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Kondisi / Penyebab Kerusakan:</label>
+      <input type="text" id="kondisi" placeholder="Contoh: Korosif, Retak Las, dll">
+    </div>
+
+    <div class="form-group">
+      <label>Keterangan Tambahan:</label>
+      <textarea id="keterangan" rows="2" placeholder="Catatan teknis ukuran/kondisi lapangan..."></textarea>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-save" onclick="processAndSave()">🚀 SIMPAN LOKASI</button>
+      <button class="btn btn-view" onclick="toggleRecords()">📂 LIHAT RECORD</button>
+    </div>
+
+    <div id="status"></div>
+
+    <!-- Panel View Record Langsung -->
+    <div id="recordModal">
+      <div style="font-weight: bold; margin-bottom: 8px; font-size: 13px; color: #333;">📋 Riwayat Data Tersimpan:</div>
+      <div id="recordList">Memuat data...</div>
+    </div>
   </div>
-
-  <div class="form-group">
-    <label>Kondisi / Penyebab:</label>
-    <input type="text" id="kondisi" placeholder="Misal: Korosif, Retak">
-  </div>
-
-  <div class="form-group">
-    <label>Keterangan Tambahan:</label>
-    <textarea id="keterangan" rows="3" placeholder="Catatan teknis..."></textarea>
-  </div>
-
-  <button class="btn-save" onclick="processAndSave()">🚀 AMBIL LOKASI & SIMPAN</button>
-  <div id="status"></div>
 </div>
 
 <script>
-  // ⚠️ GANTI TULISAN DI BAWAH DENGAN URL APPS SCRIPT YANG ANDA SIMPAN TADI
+  // ⚠️ PASTIKAN URL APPS SCRIPT ANDA SUDAH DIPASANG DI SINI
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwLJCT-IrxFHXdlKdj2w9ZcIok9egprfe_KcvjtREpIup4Ra05VRVeqqS9--3kcaPjlzQ/exec";
 
   async function getStreetName(lat, lon) {
@@ -64,7 +224,7 @@
     const kondisi = document.getElementById('kondisi').value;
     const keterangan = document.getElementById('keterangan').value;
 
-    status.innerText = "⏳ 1/3 Mengunci Koordinat GPS...";
+    status.innerText = "⏳ [1/3] Mengunci Koordinat GPS Presisi...";
 
     if (!navigator.geolocation) {
       status.innerText = "❌ GPS tidak didukung di browser ini.";
@@ -77,10 +237,10 @@
         const lon = pos.coords.longitude;
         const acc = pos.coords.accuracy;
 
-        status.innerText = "⏳ 2/3 Mencari Nama Jalan...";
+        status.innerText = "⏳ [2/3] Mengidentifikasi Nama Jalan...";
         const namaJalan = await getStreetName(lat, lon);
 
-        status.innerText = "⏳ 3/3 Menyimpan ke Database...";
+        status.innerText = "⏳ [3/3] Mengirim data ke Spreadsheet...";
 
         const payload = {
           latitude: lat,
@@ -98,18 +258,59 @@
         })
         .then(res => res.json())
         .then(data => {
-          status.innerText = `✅ TERSIMPAN!\nAlamat: ${namaJalan}`;
+          status.innerText = `✅ DATA BERHASIL TERSIMPAN!\n📍 ${namaJalan}`;
           document.getElementById('kondisi').value = '';
           document.getElementById('keterangan').value = '';
         })
         .catch(err => {
-          status.innerText = "❌ Gagal menyimpan data.";
+          status.innerText = "❌ Gagal menyimpan data ke server.";
         });
       },
       (err) => { status.innerText = "❌ Gagal mengambil GPS: " + err.message; },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
   }
+
+  // Fungsi untuk menampilkan riwayat record langsung di bawah form
+  async function toggleRecords() {
+    const modal = document.getElementById('recordModal');
+    const listDiv = document.getElementById('recordList');
+
+    if (modal.style.display === 'block') {
+      modal.style.display = 'none';
+      return;
+    }
+
+    modal.style.display = 'block';
+    listDiv.innerHTML = "⏳ Mengambil data riwayat...";
+
+    try {
+      const res = await fetch(APPS_SCRIPT_URL);
+      const data = await res.json();
+      const rows = data.slice(1).reverse(); // Ambil dari data terbaru di atas
+
+      if (rows.length === 0) {
+        listDiv.innerHTML = "Belum ada data terekam.";
+        return;
+      }
+
+      let html = "";
+      rows.slice(0, 10).forEach(row => { // Menampilkan 10 record terakhir
+        const waktu = new Date(row[0]).toLocaleString('id-ID');
+        html += `
+          <div class="record-item">
+            <b>${row[3]}</b> (${row[4] || 'Tanpa Kondisi'})<br>
+            📍 ${row[5]}<br>
+            <small style="color:#666;">🕒 ${waktu}</small>
+          </div>
+        `;
+      });
+      listDiv.innerHTML = html;
+    } catch (e) {
+      listDiv.innerHTML = "❌ Gagal memuat riwayat data.";
+    }
+  }
 </script>
+
 </body>
 </html>
