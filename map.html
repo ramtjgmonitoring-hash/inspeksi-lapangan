@@ -5,14 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Peta Monitoring Inspeksi</title>
 
-  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
   <style>
     body, html { margin: 0; padding: 0; height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     #map { width: 100%; height: 100vh; }
     
-    /* Panel Legenda */
     .legend {
       background: white;
       padding: 12px 16px;
@@ -33,7 +31,6 @@
       border: 1px solid #777;
     }
 
-    /* Popup Styling */
     .popup-title { font-weight: bold; font-size: 14px; margin-bottom: 5px; border-bottom: 1px solid #ddd; padding-bottom: 3px; }
     .popup-detail { font-size: 12px; margin: 4px 0; color: #444; }
     .btn-gmaps {
@@ -55,23 +52,19 @@
 
 <div id="map"></div>
 
-<!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-  // 1. Masukkan URL Apps Script Anda di sini
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyxhGVCzXvAdjsZt-M6XJAEAO6caKyfn8GpsGtHjGfl6WS-r6jvyTi_CQVPP9qKTr4BsA/exec";
+  // PENTING: Ganti URL di bawah dengan Web App URL dari Google Apps Script Anda
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx2zAJEkblbiXRo7sjzgjQnXrYisjwSJxPpTHnmNeghmvFuZJDgW6uz7ACaCUXLohDfHw/exec";
 
-  // 2. Inisialisasi Peta
   const map = L.map('map').setView([-2.2, 115.3], 5);
 
-  // Tile Layer dari OpenStreetMap
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '© OpenStreetMap contributors'
   }).addTo(map);
 
-  // 3. Warna Pin Berdasarkan Kategori
   function getColor(kategori) {
     switch (kategori) {
       case 'Titik Bocor':  return '#e74c3c'; // Merah
@@ -82,7 +75,6 @@
     }
   }
 
-  // Membuat Custom Marker Circle
   function createCustomIcon(color) {
     return L.divIcon({
       className: 'custom-div-icon',
@@ -92,13 +84,11 @@
     });
   }
 
-  // 4. Fetch Data dari Google Sheets
   async function loadMapData() {
     try {
       const response = await fetch(APPS_SCRIPT_URL);
       const data = await response.json();
 
-      // Mengabaikan baris pertama (Header)
       const rows = data.slice(1);
       const bounds = [];
 
@@ -114,23 +104,21 @@
           const color = getColor(kategori);
           const icon  = createCustomIcon(color);
           
-          // Link direct ke Google Maps App / Web
-          const gmapsUrl = `https://maps.google.com/?q=${lat},${lon}`;
+          // FORMAT LINK MAPS DIPERBAIKI SINI
+          const gmapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
 
-          // Konten Popup Peta
           const popupContent = `
             <div class="popup-title">${kategori}</div>
             <div class="popup-detail"><strong>Lokasi:</strong> ${namaJalan}</div>
             <div class="popup-detail"><strong>Catatan:</strong> ${keterangan}</div>
             <div class="popup-detail" style="color: #888; font-size: 10px;">
-              ${new Date(timestamp).toLocaleString('id-ID')}
+              ${timestamp ? new Date(timestamp).toLocaleString('id-ID') : 'Data Manual'}
             </div>
             <a href="${gmapsUrl}" target="_blank" class="btn-gmaps">
               🗺️ Buka di Google Maps
             </a>
           `;
 
-          // Tambahkan Marker ke Peta
           L.marker([lat, lon], { icon: icon })
             .bindPopup(popupContent)
             .addTo(map);
@@ -139,7 +127,6 @@
         }
       });
 
-      // Auto zoom-in agar seluruh marker terlihat
       if (bounds.length > 0) {
         map.fitBounds(bounds, { padding: [50, 50] });
       }
@@ -149,7 +136,6 @@
     }
   }
 
-  // 5. Panel Legenda Warna
   const legend = L.control({ position: 'bottomright' });
   legend.onAdd = function () {
     const div = L.DomUtil.create('div', 'legend');

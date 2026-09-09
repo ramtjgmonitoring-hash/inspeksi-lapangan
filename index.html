@@ -11,7 +11,6 @@
     .form-group { margin-bottom: 15px; }
     label.title-label { display: block; font-weight: bold; margin-bottom: 8px; font-size: 14px; color: #2c3e50; }
     
-    /* Style Pilihan Radio Button */
     .radio-group { display: flex; flex-direction: column; gap: 8px; }
     .radio-option {
       display: flex; align-items: center; padding: 12px; background: #f8f9fa;
@@ -30,7 +29,6 @@
     
     #status { margin-top: 15px; font-size: 13px; text-align: center; white-space: pre-line; font-weight: bold; color: #333; }
     
-    /* Style Riwayat & Link Maps */
     .history-card { margin-top: 20px; background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; }
     .history-item { font-size: 13px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #cbd5e1; }
     .history-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
@@ -86,16 +84,13 @@
 
 <script>
   // PENTING: Ganti URL di bawah dengan Web App URL dari Google Apps Script Anda
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyxhGVCzXvAdjsZt-M6XJAEAO6caKyfn8GpsGtHjGfl6WS-r6jvyTi_CQVPP9qKTr4BsA/exec";
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx2zAJEkblbiXRo7sjzgjQnXrYisjwSJxPpTHnmNeghmvFuZJDgW6uz7ACaCUXLohDfHw/exec";
 
-  // Memuat riwayat data otomatis dari Google Sheets saat halaman web dibuka
   async function loadHistoryFromSheets() {
     const historyContent = document.getElementById('historyContent');
     try {
       const res = await fetch(APPS_SCRIPT_URL);
       const data = await res.json();
-      
-      // Mengabaikan header (baris 0) dan mengambil data riwayat
       const rows = data.slice(1);
       
       if (rows.length === 0) {
@@ -104,19 +99,21 @@
       }
 
       let historyHTML = "";
-      // Loop data dari yang paling baru (paling bawah di sheet) ke atas
       for (let i = rows.length - 1; i >= 0; i--) {
         const row = rows[i];
-        const timestamp = new Date(row[0]).toLocaleString('id-ID', { 
-          day: 'numeric', month: 'numeric', year: 'numeric', 
-          hour: '2-digit', minute: '2-digit', second: '2-digit' 
-        });
+        const rawDate = row[0] ? new Date(row[0]) : null;
+        const timestamp = rawDate && !isNaN(rawDate) 
+          ? rawDate.toLocaleString('id-ID', { day: 'numeric', month: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) 
+          : 'Data Manual';
+
         const lat = row[1];
         const lon = row[2];
         const kategori = row[3] || '-';
         const namaJalan = row[5] || 'Alamat tidak dicatat';
         const keterangan = row[6] || '';
-        const gmapsUrl = `https://maps.google.com/?q=${lat},${lon}`;
+        
+        // FORMAT LINK MAPS DIPERBAIKI SINI
+        const gmapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
 
         historyHTML += `
           <div class="history-item">
@@ -188,8 +185,6 @@
         .then(() => {
           status.innerText = "✅ DATA BERHASIL TERSIMPAN!";
           document.getElementById('keterangan').value = '';
-          
-          // Refresh ulang riwayat secara real-time dari Google Sheets
           setTimeout(loadHistoryFromSheets, 1500);
         })
         .catch(err => {
@@ -202,7 +197,6 @@
     );
   }
 
-  // Jalankan pemuatan riwayat otomatis saat halaman dibuka
   loadHistoryFromSheets();
 </script>
 
