@@ -11,29 +11,29 @@
     .form-group { margin-bottom: 15px; }
     label.title-label { display: block; font-weight: bold; margin-bottom: 8px; font-size: 14px; color: #2c3e50; }
     
-    /* Style Pilihan Radio/Check-List */
+    /* Style Pilihan Radio Button */
     .radio-group { display: flex; flex-direction: column; gap: 8px; }
     .radio-option {
-      display: flex; align-items: center; padding: 10px 12px; background: #f8f9fa;
+      display: flex; align-items: center; padding: 12px; background: #f8f9fa;
       border: 1px solid #dcdfe6; border-radius: 8px; cursor: pointer; transition: 0.2s;
     }
     .radio-option:hover { background: #eef5ff; border-color: #3498db; }
     .radio-option input { margin-right: 10px; width: 18px; height: 18px; accent-color: #27ae60; }
     .radio-option span { font-size: 14px; font-weight: 500; }
 
-    textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-family: inherit; }
+    textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 14px; }
     
     .btn-container { display: flex; gap: 10px; margin-top: 15px; }
     .btn-save { flex: 1; background: #27ae60; color: white; border: none; padding: 14px; font-size: 15px; font-weight: bold; border-radius: 8px; cursor: pointer; }
-    .btn-map { flex: 1; background: #2980b9; color: white; border: none; padding: 14px; font-size: 15px; font-weight: bold; border-radius: 8px; cursor: pointer; text-decoration: none; text-align: center; }
+    .btn-map { flex: 1; background: #2980b9; color: white; border: none; padding: 14px; font-size: 15px; font-weight: bold; border-radius: 8px; cursor: pointer; text-decoration: none; text-align: center; line-height: 18px; }
     .btn-save:active, .btn-map:active { transform: scale(0.98); }
     
-    #status { margin-top: 15px; font-size: 13px; text-align: center; white-space: pre-line; font-weight: bold; }
+    #status { margin-top: 15px; font-size: 13px; text-align: center; white-space: pre-line; font-weight: bold; color: #333; }
     
     /* Style Riwayat & Link Maps */
     .history-card { margin-top: 20px; background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; }
-    .history-item { font-size: 13px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px border-style: dashed; border-color: #cbd5e1; }
-    .gmaps-link { display: inline-block; margin-top: 4px; color: #1d4ed8; text-decoration: none; font-weight: bold; font-size: 12px; }
+    .history-item { font-size: 13px; margin-bottom: 8px; padding-bottom: 8px; }
+    .gmaps-link { display: inline-block; margin-top: 6px; color: #1d4ed8; text-decoration: none; font-weight: bold; font-size: 12px; }
     .gmaps-link:hover { text-decoration: underline; }
   </style>
 </head>
@@ -83,7 +83,8 @@
 </div>
 
 <script>
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwLJCT-IrxFHXdlKdj2w9ZcIok9egprfe_KcvjtREpIup4Ra05VRVeqqS9--3kcaPjlzQ/exec";
+  // PENTING: Ganti URL di bawah dengan Web App URL dari Google Apps Script Anda
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyxhGVCzXvAdjsZt-M6XJAEAO6caKyfn8GpsGtHjGfl6WS-r6jvyTi_CQVPP9qKTr4BsA/exec";
 
   async function getStreetName(lat, lon) {
     try {
@@ -122,7 +123,7 @@
           latitude: lat,
           longitude: lon,
           kategori: selectedKategori,
-          kondisi: "-", // Nilai default karena input dihilangkan
+          kondisi: "-",
           keterangan: keterangan,
           namaJalan: namaJalan,
           accuracy: acc
@@ -130,30 +131,35 @@
 
         fetch(APPS_SCRIPT_URL, {
           method: "POST",
+          mode: "no-cors",
+          headers: {
+            "Content-Type": "text/plain"
+          },
           body: JSON.stringify(payload)
         })
-        .then(res => res.json())
-        .then(data => {
+        .then(() => {
           status.innerText = "✅ DATA BERHASIL TERSIMPAN!";
           
-          // Tampilkan Riwayat + Link Google Maps
           const gmapsUrl = `https://maps.google.com/?q=${lat},${lon}`;
           const historyBox = document.getElementById('historyBox');
           const historyContent = document.getElementById('historyContent');
           
-          historyBox.style.display = 'block';
-          historyContent.innerHTML = `
-            <div class="history-item">
-              <strong>${selectedKategori}</strong><br>
-              📍 ${namaJalan}<br>
-              <a href="${gmapsUrl}" target="_blank" class="gmaps-link">🗺️ Buka di Google Maps App</a>
-            </div>
-          `;
+          if (historyBox && historyContent) {
+            historyBox.style.display = 'block';
+            historyContent.innerHTML = `
+              <div class="history-item">
+                <strong>${selectedKategori}</strong><br>
+                📍 ${namaJalan}<br>
+                <a href="${gmapsUrl}" target="_blank" class="gmaps-link">🗺️ Buka di Google Maps App</a>
+              </div>
+            `;
+          }
 
           document.getElementById('keterangan').value = '';
         })
         .catch(err => {
           status.innerText = "❌ Gagal menyimpan data.";
+          console.error(err);
         });
       },
       (err) => { status.innerText = "❌ Gagal mengambil GPS: " + err.message; },
